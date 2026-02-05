@@ -1,0 +1,287 @@
+َ<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flores Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* --- 🎨 التنسيقات العامة --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: #f8f9fc; direction: rtl; overflow-x: hidden; color: #2d3436; }
+        
+        .page { display: none; min-height: 100vh; width: 100%; opacity: 0; transition: opacity 0.4s ease; }
+        .page.active { display: block; opacity: 1; }
+
+        /* --- 🧭 شريط التنقل السفلي الفاخر (Floating Glass Nav) --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            z-index: 2000;
+        }
+
+        .nav-item {
+            position: relative;
+            text-align: center;
+            flex: 1;
+            color: #b2bec3;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-item i {
+            font-size: 22px;
+            margin-bottom: 4px;
+            transition: 0.3s;
+        }
+
+        .nav-item span {
+            font-size: 11px;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+
+        /* حالة النشاط (Active State) */
+        .nav-item.active-link {
+            color: #3498db;
+            transform: translateY(-8px);
+        }
+
+        .nav-item.active-link i {
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 26px;
+        }
+
+        /* النقطة المضيئة تحت الأيقونة النشطة */
+        .nav-item.active-link::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            width: 6px;
+            height: 6px;
+            background: #3498db;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #3498db;
+        }
+
+        .tab-content { padding: 20px; padding-bottom: 110px; }
+
+        /* --- 🌟 النوافذ المنبثقة (Modals) --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-box {
+            background: white;
+            width: 85%;
+            max-width: 320px;
+            padding: 30px;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            transform: scale(0.8);
+            animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .alert-icon { font-size: 3.5rem; margin-bottom: 15px; }
+        .modal-message { color: #2c3e50; font-size: 1.1rem; font-weight: 700; margin-bottom: 25px; line-height: 1.5; }
+
+        .modal-btns { display: flex; gap: 12px; justify-content: center; }
+        .btn-modal { flex: 1; padding: 14px; border-radius: 50px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, #3498db, #8e44ad); color: white; box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3); }
+        .btn-danger { background: linear-gradient(135deg, #e74c3c, #c0392b); color: white; }
+        .btn-secondary { background: #f1f2f6; color: #7f8c8d; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popUp { to { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <div id="auth-page" class="page">
+        <p style="text-align:center; margin-top:50px;">جاري تحميل Flores...</p>
+    </div>
+
+    <div id="main-app" class="page">
+        <div id="content-area">
+            <div id="home-section" class="tab-content"></div>
+            <div id="wheel-section" class="tab-content" style="display:none;"></div>
+            <div id="invest-section" class="tab-content" style="display:none;"></div>
+            <div id="team-section" class="tab-content" style="display:none;"></div>
+            <div id="profile-section" class="tab-content" style="display:none;"></div>
+            <div id="deposit-section" class="tab-content" style="display:none;"></div>
+            <div id="withdraw-section" class="tab-content" style="display:none;"></div>
+        </div>
+
+        <nav class="bottom-nav">
+            <div class="nav-item active-link" onclick="window.showTab('home-section', 'home.html', this)">
+                <i class="fas fa-home"></i>
+                <span>الرئيسية</span>
+            </div>
+            <div class="nav-item" onclick="window.showTab('invest-section', 'invest.html', this)">
+                <i class="fas fa-chart-line"></i>
+                <span>الاستثمار</span>
+            </div>
+            <div class="nav-item" onclick="window.showTab('team-section', 'team.html', this)">
+                <i class="fas fa-users"></i>
+                <span>الفريق</span>
+            </div>
+            <div class="nav-item" onclick="window.showTab('profile-section', 'profile.html', this)">
+                <i class="fas fa-user-circle"></i>
+                <span>حسابي</span>
+            </div>
+        </nav>
+    </div>
+
+    <div id="custom-alert" class="modal-overlay">
+        <div class="modal-box">
+            <div class="alert-icon" id="alert-icon-el"></div>
+            <p class="modal-message" id="alert-msg"></p>
+            <button class="btn-modal btn-primary" onclick="closeAlert()">حسناً</button>
+        </div>
+    </div>
+
+    <div id="custom-confirm" class="modal-overlay">
+        <div class="modal-box">
+            <div class="alert-icon" style="color: #f39c12;"><i class="fas fa-question-circle"></i></div>
+            <p class="modal-message" id="confirm-msg"></p>
+            <div class="modal-btns">
+                <button class="btn-modal btn-secondary" id="btn-no">إلغاء</button>
+                <button class="btn-modal btn-danger" id="btn-yes">نعم، متأكد</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJGFnZpVuIlVIUy4Z1pucur_DsfqsKHKQ",
+            authDomain: "favelapro-30790.firebaseapp.com",
+            projectId: "favelapro-30790",
+            storageBucket: "favelapro-30790.firebasestorage.app",
+            messagingSenderId: "344050815030",
+            appId: "1:344050815030:web:8e9b040266163aa6968897"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const rtdb = getDatabase(app);
+
+        window.firebaseAuth = auth;
+        window.firebaseRtdb = rtdb;
+
+        // دالة تسجيل الخروج (يمكن استدعاؤها من ملف profile.html)
+        window.handleLogout = async function() {
+            const confirmed = await window.showConfirm("هل أنت متأكد من رغبتك في تسجيل الخروج؟");
+            if (confirmed) {
+                try {
+                    await signOut(auth);
+                } catch (error) {
+                    window.alert("خطأ أثناء تسجيل الخروج: " + error.message);
+                }
+            }
+        };
+
+        window.alert = function(message) {
+            document.getElementById('alert-msg').innerText = message;
+            const icon = document.getElementById('alert-icon-el');
+            if(message.includes('نجاح') || message.includes('تم')) {
+                icon.innerHTML = '<i class="fas fa-check-circle" style="color:#2ecc71;"></i>';
+            } else if (message.includes('خطأ') || message.includes('يرجى')) {
+                icon.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#e74c3c;"></i>';
+            } else {
+                icon.innerHTML = '<i class="fas fa-info-circle" style="color:#3498db;"></i>';
+            }
+            document.getElementById('custom-alert').style.display = 'flex';
+        };
+
+        window.closeAlert = () => document.getElementById('custom-alert').style.display = 'none';
+
+        window.showConfirm = function(message) {
+            return new Promise((resolve) => {
+                document.getElementById('confirm-msg').innerText = message;
+                document.getElementById('custom-confirm').style.display = 'flex';
+                document.getElementById('btn-yes').onclick = () => { document.getElementById('custom-confirm').style.display = 'none'; resolve(true); };
+                document.getElementById('btn-no').onclick = () => { document.getElementById('custom-confirm').style.display = 'none'; resolve(false); };
+            });
+        };
+
+        window.loadComponent = async function(file, targetId) {
+            try {
+                const response = await fetch(file + '?v=' + Math.random());
+                const html = await response.text();
+                const target = document.getElementById(targetId);
+                target.innerHTML = html;
+                const scripts = target.getElementsByTagName('script');
+                for (let script of scripts) {
+                    const newScript = document.createElement("script");
+                    newScript.type = script.type || "text/javascript";
+                    if (script.src) newScript.src = script.src;
+                    else newScript.text = script.text;
+                    document.body.appendChild(newScript).parentNode.removeChild(newScript);
+                }
+            } catch (err) { console.error("Error loading:", err); }
+        };
+
+        window.showTab = async function(tabId, fileName, element) {
+            document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+            const target = document.getElementById(tabId);
+            if(target) {
+                target.style.display = 'block';
+                if (fileName && (target.innerHTML.trim() === "" || target.innerHTML.includes('جاري'))) {
+                    await window.loadComponent(fileName, tabId);
+                }
+            }
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active-link'));
+            if (element) element.classList.add('active-link');
+        };
+
+        window.goToDashboard = function() {
+            document.getElementById('auth-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            setTimeout(() => { document.getElementById('main-app').classList.add('active'); }, 10);
+            window.showTab('home-section', 'home.html');
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.goToDashboard();
+            } else {
+                document.getElementById('main-app').style.display = 'none';
+                document.getElementById('auth-page').style.display = 'block';
+                window.loadComponent('auth.html', 'auth-page');
+            }
+        });
+    </script>
+</body>
+</html>
