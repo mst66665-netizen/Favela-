@@ -1,0 +1,148 @@
+<div class="auth-wrapper">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --primary: #3498db; --bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--bg); padding: 20px; font-family: 'Cairo'; }
+        .auth-box { background: rgba(255,255,255,0.95); padding: 40px 30px; border-radius: 25px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); }
+        .brand-logo { font-size: 3.5rem; font-weight: 900; background: linear-gradient(to bottom, #3498db, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .auth-tabs { display: flex; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 15px; margin: 25px 0; }
+        .auth-tab { flex: 1; padding: 12px; cursor: pointer; border-radius: 12px; color: #777; font-weight: 700; transition: 0.3s; }
+        .active-tab { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 20px; text-align: right; }
+        .input-group label { display: block; margin-bottom: 8px; font-weight: 700; font-size: 0.85rem; color: #444; }
+        .input-container { position: relative; display: flex; align-items: center; }
+        .input-container i { position: absolute; right: 15px; color: #aaa; }
+        .input-container input { width: 100%; padding: 14px 45px 14px 15px; border: 2px solid #eee; border-radius: 15px; outline: none; transition: 0.3s; }
+        .input-container input:focus { border-color: var(--primary); }
+        .auth-btn { width: 100%; padding: 16px; background: linear-gradient(to right, #3498db, #764ba2); color: white; border: none; border-radius: 15px; font-size: 1.1rem; font-weight: 800; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .f-container { display: none; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+
+    <div class="auth-box">
+        <h1 class="brand-logo">Flores</h1>
+        <p style="margin-bottom:20px; color:#555; font-weight: 600;">مرحباً بك في المنصة الاستثمارية</p>
+
+        <div class="auth-tabs">
+            <div id="t-l" class="auth-tab active-tab" onclick="runToggle('login')">تسجيل الدخول</div>
+            <div id="t-r" class="auth-tab" onclick="runToggle('reg')">فتح حساب</div>
+        </div>
+
+        <div id="v-l" class="f-container" style="display: block;">
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>البريد الإلكتروني</label>
+                    <div class="input-container">
+                        <input type="email" id="loginEmail" placeholder="mail@example.com" required>
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>كلمة المرور</label>
+                    <div class="input-container">
+                        <input type="password" id="loginPass" placeholder="••••••••" required>
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+                <button type="submit" class="auth-btn" id="lb">دخول آمن <i class="fas fa-sign-in-alt"></i></button>
+            </form>
+        </div>
+
+        <div id="v-r" class="f-container">
+            <form id="regForm">
+                <div class="input-group">
+                    <label>البريد الإلكتروني</label>
+                    <div class="input-container">
+                        <input type="email" id="regEmail" placeholder="mail@example.com" required>
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>كلمة المرور</label>
+                    <div class="input-container">
+                        <input type="password" id="regPass" placeholder="••••••••" required>
+                        <i class="fas fa-key"></i>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>كلمة مرور السحب</label>
+                    <div class="input-container">
+                        <input type="password" id="withdrawPass" maxlength="6" placeholder="6 أرقام سريّة" required>
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>كود الدعوة</label>
+                    <div class="input-container">
+                        <input type="text" id="inviteCode" placeholder="اختياري">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                </div>
+                <button type="submit" class="auth-btn" id="rb">ابدأ الآن <i class="fas fa-rocket"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function runToggle(m) {
+            document.getElementById('v-l').style.display = (m==='login'?'block':'none');
+            document.getElementById('v-r').style.display = (m==='reg'?'block':'none');
+            document.getElementById('t-l').classList.toggle('active-tab', m==='login');
+            document.getElementById('t-r').classList.toggle('active-tab', m==='reg');
+        }
+    </script>
+
+    <script type="module">
+        import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { ref, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
+        const auth = window.parent.firebaseAuth || window.firebaseAuth;
+        const rtdb = window.parent.firebaseRtdb || window.firebaseRtdb;
+
+        document.getElementById('regForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const b = document.getElementById('rb'); 
+            const originalText = b.innerHTML;
+            b.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> جاري الحفظ...'; 
+            b.disabled = true;
+
+            try {
+                const c = await createUserWithEmailAndPassword(auth, regEmail.value, regPass.value);
+                
+                // تنظيف الإيميل لاستخدامه كعنوان (Key) في RTDB (إزالة النقاط لأنها ممنوعة في العناوين)
+                const cleanEmail = regEmail.value.replace(/\./g, '_');
+
+                // الحفظ في Realtime Database باستخدام الإيميل المنظف كعنوان
+                await set(ref(rtdb, 'users/' + cleanEmail), {
+                    email: regEmail.value,
+                    uid: c.user.uid,
+                    withdrawPassword: withdrawPass.value,
+                    inviteCode: inviteCode.value || "None",
+                    balance: 0,
+                    createdAt: Date.now()
+                });
+
+                if(window.parent.goToDashboard) window.parent.goToDashboard();
+            } catch(err) { 
+                alert("خطأ: " + err.message); 
+                b.innerHTML = originalText; 
+                b.disabled = false; 
+            }
+        };
+
+        document.getElementById('loginForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const b = document.getElementById('lb'); 
+            b.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> جاري التحقق...'; 
+            b.disabled = true;
+            try { 
+                await signInWithEmailAndPassword(auth, loginEmail.value, loginPass.value); 
+                if(window.parent.goToDashboard) window.parent.goToDashboard();
+            } catch(err) { 
+                alert("بيانات خاطئة"); 
+                b.innerHTML = 'دخول آمن <i class="fas fa-sign-in-alt"></i>'; 
+                b.disabled = false; 
+            }
+        };
+    </script>
+</div>
