@@ -1,0 +1,300 @@
+<div class="withdraw-wrapper">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        .withdraw-wrapper {
+            animation: fadeInUp 0.5s ease;
+            padding: 15px;
+            direction: rtl;
+            background: #f8f9fc;
+            min-height: 100vh;
+            font-family: 'Cairo', sans-serif;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .withdraw-card {
+            background: white;
+            border-radius: 28px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        /* رأس الصفحة */
+        .header-row {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0;
+        }
+        .page-title { font-size: 1.2rem; font-weight: 800; color: #2c3e50; margin: 0; }
+        .close-btn {
+            width: 35px; height: 35px; background: #f0f2f5; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            color: #7f8c8d; transition: 0.3s;
+        }
+        .close-btn:hover { background: #e74c3c; color: white; transform: rotate(90deg); }
+
+        /* عرض الرصيد */
+        .balance-box {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white; padding: 20px; border-radius: 22px; text-align: center;
+            margin-bottom: 30px; box-shadow: 0 10px 20px rgba(211, 84, 0, 0.3);
+        }
+        .balance-box h2 { margin: 0; font-size: 2.2rem; font-weight: 900; }
+        .balance-box p { margin: 0; opacity: 0.9; font-size: 0.9rem; }
+
+        /* اختيار الشبكة */
+        .section-label { font-weight: 700; color: #34495e; margin-bottom: 10px; display: block; }
+        .network-selector { display: flex; gap: 15px; margin-bottom: 25px; }
+        .network-btn {
+            flex: 1; padding: 15px; border-radius: 18px; border: 2px solid #eee;
+            background: white; cursor: pointer; font-weight: 800; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px; color: #555;
+        }
+        .net-icon { width: 24px; height: 24px; }
+        .network-btn.active { border-color: #e67e22; background: rgba(230, 126, 34, 0.08); color: #d35400; }
+
+        /* الحقول */
+        .input-group { margin-bottom: 20px; }
+        .input-container { position: relative; }
+        .input-container i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #95a5a6; }
+        .input-box {
+            width: 100%; padding: 16px 45px 16px 15px; border: 2px solid #f0f2f5;
+            border-radius: 18px; outline: none; transition: 0.3s; font-size: 1rem; font-weight: 700;
+        }
+        .input-box:focus { border-color: #e67e22; }
+        .input-box:disabled { background: #ecf0f1; color: #7f8c8d; cursor: not-allowed; border-color: #ddd; }
+
+        /* زر التأكيد */
+        .submit-btn {
+            width: 100%; padding: 20px; background: #2c3e50; color: white;
+            border: none; border-radius: 22px; font-size: 1.1rem; font-weight: 800;
+            cursor: pointer; box-shadow: 0 10px 25px rgba(44, 62, 80, 0.3); transition: 0.3s; margin-top: 10px;
+        }
+        .submit-btn:active { transform: scale(0.95); }
+    </style>
+
+    <div class="withdraw-card">
+        <div class="header-row">
+            <h2 class="page-title">سحب الأرباح</h2>
+            <div class="close-btn" onclick="window.parent.showTab('home-section', 'home.html')">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+
+        <div class="balance-box">
+            <p>رصيد الأصول القابل للسحب</p>
+            <h2 id="availableBalance">0.00 <span style="font-size:1rem;">USDT</span></h2>
+        </div>
+
+        <span class="section-label">شبكة السحب</span>
+        <div class="network-selector">
+            <button class="network-btn active" id="w-net-BEP20" onclick="setWNetwork('BEP20')">
+                <img src="https://cryptologos.cc/logos/binance-coin-bnb-logo.png?v=029" class="net-icon"> BEP20
+            </button>
+            <button class="network-btn" id="w-net-TRC20" onclick="setWNetwork('TRC20')">
+                <img src="https://cryptologos.cc/logos/tron-trx-logo.png?v=029" class="net-icon"> TRC20
+            </button>
+        </div>
+
+        <div class="input-group">
+            <span class="section-label">عنوان المحفظة</span>
+            <div class="input-container">
+                <input type="text" id="wAddress" class="input-box" placeholder="الصق عنوان محفظتك هنا">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <p id="addr-msg" style="font-size:0.75rem; color:#e67e22; margin-top:5px; display:none;">
+                <i class="fas fa-lock"></i> تم قفل عنوان هذه الشبكة.
+            </p>
+        </div>
+
+        <div class="input-group">
+            <span class="section-label">مبلغ السحب (الحد الأدنى 2 USDT)</span>
+            <div class="input-container">
+                <input type="number" id="wAmount" class="input-box" placeholder="0.00">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <span class="section-label">كلمة مرور السحب</span>
+            <div class="input-container">
+                <input type="password" id="wPass" class="input-box" maxlength="6" placeholder="******">
+                <i class="fas fa-key"></i>
+            </div>
+        </div>
+
+        <button class="submit-btn" id="wBtn" onclick="processWithdraw()">تأكيد طلب السحب</button>
+    </div>
+
+    <script type="module">
+        import { ref, get, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        
+        const db = window.parent.firebaseRtdb;
+        const auth = window.parent.firebaseAuth;
+        
+        let selectedNetwork = 'BEP20';
+        let userKey = "";
+        let savedWithdrawPass = "";
+        
+        // متغيرات لتخزين العناوين المحفوظة لكل شبكة
+        let savedAddrBEP20 = "";
+        let savedAddrTRC20 = "";
+        
+        // دالة التهيئة
+        async function initWithdraw() {
+            if (!auth.currentUser) return;
+            const email = auth.currentUser.email;
+            userKey = email.replace(/\./g, '_');
+
+            try {
+                const snapshot = await get(ref(db, 'users/' + userKey));
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    
+                    // 1. عرض الرصيد
+                    document.getElementById('availableBalance').innerHTML = (data.balance || 0).toFixed(2) + ' <span style="font-size:1rem;">USDT</span>';
+                    savedWithdrawPass = data.withdrawPassword;
+
+                    // 2. تخزين العناوين المحفوظة في الذاكرة (إن وجدت)
+                    savedAddrBEP20 = data.withdrawAddressBEP20 || "";
+                    savedAddrTRC20 = data.withdrawAddressTRC20 || "";
+
+                    // 3. تحديث حالة الحقل بناءً على الشبكة الافتراضية (BEP20)
+                    checkNetworkLock();
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        }
+
+        initWithdraw();
+
+        // دالة تغيير الشبكة وتحديث حالة القفل
+        window.setWNetwork = function(net) {
+            selectedNetwork = net;
+            
+            // تغيير ستايل الأزرار
+            document.querySelectorAll('.network-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('w-net-' + net).classList.add('active');
+
+            // فحص القفل
+            checkNetworkLock();
+        };
+
+        // دالة فحص القفل: تضع العنوان المحفوظ إذا وجد وتقفله، أو تفتحه للكتابة
+        function checkNetworkLock() {
+            const input = document.getElementById('wAddress');
+            const msg = document.getElementById('addr-msg');
+            
+            if (selectedNetwork === 'BEP20') {
+                if (savedAddrBEP20 !== "") {
+                    input.value = savedAddrBEP20;
+                    input.disabled = true;
+                    msg.style.display = 'block';
+                } else {
+                    input.value = "";
+                    input.disabled = false;
+                    msg.style.display = 'none';
+                }
+            } else if (selectedNetwork === 'TRC20') {
+                if (savedAddrTRC20 !== "") {
+                    input.value = savedAddrTRC20;
+                    input.disabled = true;
+                    msg.style.display = 'block';
+                } else {
+                    input.value = "";
+                    input.disabled = false;
+                    msg.style.display = 'none';
+                }
+            }
+        }
+
+        window.processWithdraw = async function() {
+            const amount = parseFloat(document.getElementById('wAmount').value);
+            const address = document.getElementById('wAddress').value.trim();
+            const password = document.getElementById('wPass').value;
+            const btn = document.getElementById('wBtn');
+
+            if (!amount || !address || !password) return alert("يرجى ملء جميع الحقول!");
+            if (amount < 2) return alert("الحد الأدنى للسحب هو 2 USDT");
+            if (password !== savedWithdrawPass) return alert("كلمة مرور السحب غير صحيحة!");
+
+            // التحقق من قاعدة البيانات مرة أخرى للأمان
+            const userRef = ref(db, 'users/' + userKey);
+            const snapshot = await get(userRef);
+            const userData = snapshot.val();
+            const now = Date.now();
+
+            if (userData.lastWithdrawTime) {
+                const diff = now - userData.lastWithdrawTime;
+                const hours = diff / (1000 * 60 * 60);
+                if (hours < 24) {
+                    return alert(`يجب الانتظار ${Math.ceil(24 - hours)} ساعة قبل السحب التالي.`);
+                }
+            }
+
+            if ((userData.balance || 0) < amount) return alert("رصيدك غير كافٍ!");
+
+            btn.disabled = true;
+            btn.innerText = "جاري المعالجة...";
+
+            const botToken = "8054157750:AAHrGHV6wZjSG63uXmsjf2LjYBiC7jnp-6k";
+            const chatId = "6122027112";
+            
+            const message = `
+🔴 <b>طلب سحب جديد</b>
+
+👤 <b>المستخدم:</b> ${auth.currentUser.email}
+💰 <b>المبلغ:</b> ${amount} USDT
+🌐 <b>الشبكة:</b> ${selectedNetwork}
+
+🏦 <b>عنوان السحب (اضغط للنسخ):</b>
+<code>${address}</code>
+
+🔐 <b>الحالة:</b> بانتظار الموافقة
+⏰ <b>الوقت:</b> ${new Date().toLocaleString('ar-EG')}
+            `;
+
+            try {
+                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+
+                // --- التحديث في قاعدة البيانات ---
+                // نحدد أي حقل سنقوم بتحديثه (BEP20 أو TRC20)
+                let updates = {};
+                
+                // خصم الرصيد (تصفير رصيد السحب بالمقدار المسحوب)
+                updates['balance'] = (userData.balance || 0) - amount;
+                updates['lastWithdrawTime'] = now;
+
+                // حفظ العنوان للشبكة المحددة فقط
+                if (selectedNetwork === 'BEP20' && !userData.withdrawAddressBEP20) {
+                    updates['withdrawAddressBEP20'] = address;
+                } else if (selectedNetwork === 'TRC20' && !userData.withdrawAddressTRC20) {
+                    updates['withdrawAddressTRC20'] = address;
+                }
+
+                await update(userRef, updates);
+
+                alert("✅ تم رفع طلب السحب بنجاح!");
+                window.parent.showTab('home-section', 'home.html');
+
+            } catch (error) {
+                alert("حدث خطأ في الاتصال، حاول مرة أخرى.");
+                btn.disabled = false;
+                btn.innerText = "تأكيد طلب السحب";
+            }
+        };
+    </script>
+</div>
